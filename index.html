@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experiment 10 — Determination of an Equilibrium Constant</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#12243a;--rust:#8B2500;--orange:#c45e1a;--gold:#d4951a;
+  --red-sol:#c0392b;--teal:#0b6e72;--green:#1a6b3a;
+  --bg:#f7f4ef;--bg2:#ede9e2;--card:#ffffff;--border:#d6d0c6;
+  --muted:#7a7265;--text:#1a1a1a;
+  --serif:'Crimson Pro',Georgia,serif;--sans:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --fescn:#c0392b; /* red-brown of FeSCN²⁺ */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ── LOGIN ── */
+#s-login{background:var(--navy);align-items:center;justify-content:center;padding:40px 20px}
+.lbox{background:var(--card);border-radius:3px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.lhdr{background:var(--navy);padding:30px 34px 26px;border-bottom:3px solid var(--orange)}
+.lexp{font-family:var(--mono);font-size:.68rem;color:var(--gold);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.ltitle{font-family:var(--serif);font-size:1.6rem;color:#fff;font-weight:700;line-height:1.25}
+.lsub{font-size:.78rem;color:#9db0c8;margin-top:7px}
+.lbody{padding:30px 34px}
+.lfield{margin-bottom:17px}
+.lfield label{display:block;font-size:.71rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.lfield input{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:2px;font-family:var(--sans);font-size:.9rem;background:var(--bg);transition:border-color .2s}
+.lfield input:focus{outline:none;border-color:var(--orange)}
+.lstart{width:100%;padding:13px;background:var(--orange);color:#fff;border:none;border-radius:2px;font-family:var(--sans);font-size:.92rem;font-weight:600;cursor:pointer;margin-top:8px;transition:background .2s}
+.lstart:hover{background:var(--rust)}
+.lcaut{margin-top:18px;padding:11px 13px;background:#fff8e1;border-left:4px solid var(--gold);border-radius:0 2px 2px 0;font-size:.77rem;color:#7d5a00;line-height:1.5}
+.lcaut strong{display:block;margin-bottom:3px}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--navy);color:#fff;padding:9px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);gap:10px}
+.tb-l{font-family:var(--mono);font-size:.66rem;color:#8aa4c0;white-space:nowrap}
+.tb-m{font-family:var(--serif);font-size:1rem;font-weight:700;flex:1;text-align:center}
+.tb-r{display:flex;align-items:center;gap:12px;white-space:nowrap}
+.tb-stu{font-family:var(--mono);font-size:.66rem;color:#8aa4c0}
+#timer{font-family:var(--mono);font-size:.86rem;font-weight:600;color:#7dffda}
+#timer.warn{color:#ffbb44;animation:blink 1s infinite}
+#timer.danger{color:#ff6b6b;animation:blink .4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── TABS ── */
+.tabs{background:var(--bg2);border-bottom:2px solid var(--border);display:flex;overflow-x:auto;padding:0 18px}
+.tab{padding:11px 18px;font-size:.77rem;font-weight:600;color:var(--muted);border:none;background:none;cursor:default;border-bottom:3px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:var(--sans);user-select:none;transition:color .2s}
+.tab.active{color:var(--orange);border-bottom-color:var(--orange)}
+.tab.done{color:var(--green)}
+.tab.done::after{content:' ✓'}
+
+/* ── PANELS ── */
+.panel{display:none;padding:26px 22px;max-width:1000px;width:100%;margin:0 auto}
+.panel.active{display:block}
+.snum{font-family:var(--mono);font-size:.65rem;color:var(--orange);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}
+.stitle{font-family:var(--serif);font-size:1.5rem;font-weight:700;color:var(--navy)}
+.sdesc{font-size:.84rem;color:var(--muted);margin-top:6px;line-height:1.65;margin-bottom:22px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:19px 21px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ctitle{font-weight:600;font-size:.87rem;color:var(--navy);margin-bottom:13px;border-bottom:1px solid var(--border);padding-bottom:8px;font-family:var(--sans)}
+
+/* ── BEAKER SVG ── */
+.beakers-row{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;padding:10px 0}
+.bkr-wrap{display:flex;flex-direction:column;align-items:center;gap:7px}
+.bkr-label{font-family:var(--mono);font-size:.68rem;font-weight:600;color:var(--muted);text-align:center}
+.bkr-conc{font-family:var(--mono);font-size:.7rem;color:var(--orange);font-weight:600;text-align:center;min-height:16px}
+
+/* ── COLORIMETER ── */
+.colorimeter-wrap{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+.cuvette-slot{width:52px;height:80px;border:3px solid #888;border-radius:4px;background:#f0f8ff;position:relative;overflow:hidden;transition:background .4s}
+.cuvette-liquid{position:absolute;bottom:0;left:0;right:0;height:75%;transition:background-color .5s}
+.cuvette-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-align:center;margin-top:4px}
+.abs-display{font-family:var(--mono);font-size:1.6rem;font-weight:700;color:var(--navy);text-align:center;padding:14px 20px;background:var(--bg2);border-radius:3px;border:1px solid var(--border);min-width:140px}
+.abs-label{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-align:center;margin-top:4px}
+.wavelength-badge{display:inline-block;background:var(--navy);color:#7ee8fa;font-family:var(--mono);font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:2px}
+
+/* ── CHART CANVAS ── */
+canvas{border-radius:3px}
+
+/* ── TABLE ── */
+.ftable{width:100%;border-collapse:collapse;font-size:.82rem}
+.ftable th{background:var(--navy);color:#fff;padding:8px 11px;font-weight:600;font-size:.74rem;text-align:left}
+.ftable td{padding:7px 11px;border-bottom:1px solid var(--border);vertical-align:middle}
+.ftable tr:nth-child(even) td{background:var(--bg)}
+.finp{width:100%;padding:5px 8px;border:1.5px solid var(--border);border-radius:2px;font-family:var(--sans);font-size:.81rem;background:var(--bg);transition:border-color .2s}
+.finp:focus{outline:none;border-color:var(--orange)}
+.finp.given{background:#f0f9f8;color:var(--teal);font-weight:600;pointer-events:none;border-color:#9dd4cf}
+.finp.ok{border-color:var(--green);background:#f0fff4}
+.finp.bad{border-color:var(--red-sol);background:#fff5f5}
+
+/* ── ICE TABLE ── */
+.ice-wrap{overflow-x:auto;margin-bottom:14px}
+.ice-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:440px}
+.ice-table th{padding:8px 12px;font-weight:700;font-size:.74rem;text-align:center;border:1px solid var(--border)}
+.ice-table th.species{background:var(--navy);color:#fff}
+.ice-table th.row-lbl{background:var(--bg2);color:var(--navy);text-align:left}
+.ice-table td{padding:7px 10px;border:1px solid var(--border);text-align:center}
+.ice-table td.row-name{background:var(--bg2);font-weight:700;color:var(--navy);font-size:.78rem;text-align:left}
+.ice-given{background:#f0f9f8;color:var(--teal);font-family:var(--mono);font-size:.8rem;font-weight:600}
+.ice-calc{background:#fffbf0;color:var(--orange);font-family:var(--mono);font-size:.8rem;font-weight:600}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 16px;border:none;border-radius:2px;font-family:var(--sans);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+.borange{background:var(--orange);color:#fff}.borange:hover{background:var(--rust)}
+.bnavy{background:var(--navy);color:#fff}.bnavy:hover{background:#1e3a5f}
+.boutline{background:transparent;border:1.5px solid var(--border);color:var(--navy)}.boutline:hover{border-color:var(--orange);color:var(--orange)}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.dbtn{background:none;border:2px solid var(--orange);color:var(--orange);padding:8px 15px;border-radius:2px;font-family:var(--sans);font-size:.81rem;font-weight:600;cursor:pointer;transition:all .2s}
+.dbtn:hover{background:var(--orange);color:#fff}
+.dbtn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ── DRA ── */
+.qblock{margin-bottom:20px;border:1px solid var(--border);border-radius:3px;overflow:hidden}
+.qhdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.qnum{font-family:var(--mono);font-size:.79rem;font-weight:600;color:var(--navy)}
+.qpts{font-family:var(--mono);font-size:.73rem;color:var(--muted)}
+.qtimer{font-family:var(--mono);font-size:.79rem;font-weight:600;color:var(--teal)}
+.qtimer.warn{color:var(--gold)}
+.qtimer.exp{color:var(--red-sol)}
+.qtext{padding:12px 14px 8px;font-size:.86rem;font-weight:500;color:var(--navy);line-height:1.65;font-style:italic}
+.qans{width:100%;min-height:106px;padding:11px 14px;border:none;border-top:1px solid var(--border);font-family:var(--sans);font-size:.84rem;resize:vertical;background:#fafaf8;line-height:1.6}
+.qans:focus{outline:none;background:#fff}
+.qans:disabled{background:#f5f3f0;color:#aaa;cursor:not-allowed}
+.qlocked{padding:9px 14px;background:#fff5f5;font-size:.77rem;color:var(--red-sol);font-weight:600;display:none}
+
+/* ── MCQ ── */
+.mcq-card{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:19px 21px;margin-bottom:14px;transition:opacity .3s}
+.mcq-qnum{font-family:var(--mono);font-size:.7rem;color:var(--orange);font-weight:600}
+.mcq-qtext{font-size:.9rem;font-weight:500;color:var(--navy);line-height:1.65;margin:9px 0 13px}
+.mcq-opts{display:flex;flex-direction:column;gap:7px}
+.mcq-opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--border);border-radius:2px;cursor:pointer;transition:all .2s;font-size:.84rem}
+.mcq-opt:hover{border-color:var(--orange);background:#fff8f0}
+.mcq-opt.selected{border-color:var(--orange);background:#fff0e0;font-weight:600}
+.mcq-opt input[type=radio]{accent-color:var(--orange);width:15px;height:15px;flex-shrink:0}
+.mcq-timer{font-family:var(--mono);font-size:.79rem;font-weight:600;color:var(--teal)}
+.mcq-timer.warn{color:var(--gold)}
+.mcq-timer.exp{color:var(--red-sol)}
+.score-banner{background:var(--navy);color:#fff;border-radius:3px;padding:20px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}
+.score-num{font-family:var(--mono);font-size:2rem;font-weight:700;color:var(--gold)}
+.score-fb{font-size:.81rem;color:#9db0c8;margin-top:3px}
+
+/* ── INFO ── */
+.ibox{background:#e8f4fd;border-left:4px solid var(--teal);padding:10px 14px;border-radius:0 3px 3px 0;font-size:.8rem;color:#154360;line-height:1.6;margin-bottom:12px}
+.wbox{background:#fff8e1;border-left:4px solid var(--gold);padding:10px 14px;border-radius:0 3px 3px 0;font-size:.8rem;color:#7d5a00;line-height:1.6;margin-bottom:12px}
+.rbox{padding:8px 13px;background:var(--bg2);border-radius:2px;font-family:var(--mono);font-size:.86rem;font-weight:600;color:var(--orange);display:inline-block}
+.step-dot{background:var(--orange);color:#fff;border-radius:50%;min-width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:2px}
+
+/* ── OVERLAY / TOAST ── */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9000;align-items:center;justify-content:center}
+#overlay.on{display:flex}
+.obox{background:#fff;border-radius:4px;padding:40px 46px;text-align:center;max-width:400px}
+.obox h2{font-family:var(--serif);font-size:1.5rem;color:var(--navy);margin-bottom:10px}
+.obox p{color:var(--muted);font-size:.88rem;line-height:1.65}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:3px;font-size:.81rem;font-weight:500;z-index:9999;transition:transform .3s;box-shadow:0 4px 18px rgba(0,0,0,.28);pointer-events:none;white-space:nowrap}
+#toast.on{transform:translateX(-50%) translateY(0)}
+.cbadge{display:inline-block;background:var(--orange);color:#fff;font-family:var(--mono);font-size:.69rem;font-weight:600;padding:2px 8px;border-radius:10px}
+.lv{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+@media(max-width:640px){.panel{padding:16px 12px}.topbar{padding:8px 12px}.lv{flex-direction:column;align-items:center}}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div id="overlay"><div class="obox"><h2>⏱ Session Ended</h2><p>Your 90-minute session has expired.<br>Your report was downloaded automatically.<br><br>Please wait for your instructor.</p></div></div>
+
+<!-- ══ LOGIN ══ -->
+<div class="screen active" id="s-login">
+  <div class="lbox">
+    <div class="lhdr">
+      <div class="lexp">Experiment 10 · General Chemistry</div>
+      <div class="ltitle">Determination of an Equilibrium Constant</div>
+      <div class="lsub">Fe³⁺ + SCN⁻ ⇌ FeSCN²⁺ &nbsp;·&nbsp; Colorimetric Analysis</div>
+    </div>
+    <div class="lbody">
+      <div class="lfield"><label>Student Name</label><input id="inp-name" placeholder="First Last" autocomplete="off"></div>
+      <div class="lfield"><label>Student ID</label><input id="inp-id" placeholder="e.g. 20241234" autocomplete="off"></div>
+      <div class="lfield"><label>Section</label><input id="inp-sec" placeholder="e.g. L03" autocomplete="off"></div>
+      <button class="lstart" onclick="startLab()">Begin Experiment →</button>
+      <div class="lcaut"><strong>⚠ Safety</strong>Fe(NO₃)₃ solutions are prepared in 1.0 M HNO₃ — handle with care. Wear goggles. Avoid skin contact.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LAB ══ -->
+<div class="screen" id="s-lab">
+  <div class="topbar">
+    <div class="tb-l">CHEM · EXP 10</div>
+    <div class="tb-m">Determination of Keq — Fe³⁺ + SCN⁻ ⇌ FeSCN²⁺</div>
+    <div class="tb-r"><div class="tb-stu" id="tb-stu"></div><div id="timer">90:00</div></div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column">
+    <div class="tabs">
+      <button class="tab active" id="tab0">Pre-Lab</button>
+      <button class="tab" id="tab1">Part I — Standard Curve</button>
+      <button class="tab" id="tab2">Part II — Equilibrium</button>
+      <button class="tab" id="tab3">MCQ — Quiz</button>
+      <button class="tab" id="tab4">DRA — Analysis</button>
+    </div>
+
+<!-- ══ PRE-LAB ══ -->
+<div class="panel active" id="p0">
+  <div class="snum">Pre-Lab Exercise</div>
+  <div class="stitle">Pre-Lab Calculation</div>
+  <div class="sdesc">Before starting the experiment, calculate the expected [FeSCN²⁺] for each of the four standard solutions in Part I. In Part I, Fe³⁺ is in large excess, so ALL of the SCN⁻ will be converted to FeSCN²⁺.</div>
+
+  <div class="card">
+    <div class="ctitle">Background — The Reaction</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
+      <div style="flex:1;min-width:220px;font-size:.88rem;line-height:1.75;color:var(--navy)">
+        <div style="font-family:var(--serif);font-size:1.15rem;font-weight:700;color:var(--rust);margin-bottom:10px">Fe³⁺(aq) + SCN⁻(aq) ⇌ FeSCN²⁺(aq)</div>
+        <div>FeSCN²⁺ forms a distinctive <strong>blood-red color</strong> in solution. The reactants (Fe³⁺ and SCN⁻) are essentially colorless, so all color observed is due to FeSCN²⁺.</div>
+        <div style="margin-top:10px">The equilibrium expression is:</div>
+        <div style="font-family:var(--mono);font-size:.85rem;background:var(--bg2);padding:8px 14px;border-radius:2px;margin-top:6px;color:var(--navy)">Keq = [FeSCN²⁺] / ([Fe³⁺][SCN⁻])</div>
+      </div>
+      <div>
+        <svg width="160" height="130" viewBox="0 0 160 130">
+          <defs>
+            <linearGradient id="solGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#c0392b" stop-opacity=".7"/>
+              <stop offset="100%" stop-color="#8B1a0a" stop-opacity=".9"/>
+            </linearGradient>
+          </defs>
+          <!-- Erlenmeyer flask shape -->
+          <path d="M 55,15 L 70,15 L 70,55 L 100,110 Q 105,118 80,120 Q 55,118 60,110 L 90,55 L 55,15 Z" fill="url(#solGrad)" stroke="#7a1a0a" stroke-width="1.5" opacity=".85"/>
+          <path d="M 55,15 L 70,15" stroke="#bbb" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Equilibrium arrows -->
+          <text x="20" y="75" font-family="'Crimson Pro',serif" font-size="11" fill="var(--navy)" font-weight="600">Fe³⁺</text>
+          <text x="20" y="88" font-family="'Crimson Pro',serif" font-size="11" fill="var(--navy)" font-weight="600">+ SCN⁻</text>
+          <path d="M 50,72 L 58,68" stroke="var(--orange)" stroke-width="1.5" marker-end="url(#arr)"/>
+          <path d="M 58,78 L 50,82" stroke="var(--orange)" stroke-width="1.5" marker-end="url(#arr2)"/>
+          <defs>
+            <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="var(--orange)"/></marker>
+            <marker id="arr2" markerWidth="6" markerHeight="6" refX="1" refY="3" orient="auto"><path d="M6,0 L6,6 L0,3 z" fill="var(--orange)"/></marker>
+          </defs>
+          <text x="108" y="72" font-family="'Crimson Pro',serif" font-size="11" fill="var(--rust)" font-weight="700">FeSCN²⁺</text>
+          <text x="108" y="86" font-family="'Crimson Pro',serif" font-size="10" fill="var(--rust)">(red)</text>
+          <text x="62" y="128" text-anchor="middle" font-family="'Outfit',sans-serif" font-size="9" fill="var(--muted)">Equilibrium mixture</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Pre-Lab: Calculate [FeSCN²⁺] for Part I Standard Solutions</div>
+    <div class="ibox">In Part I, 5.0 mL of 0.200 M Fe³⁺ is added to each beaker. Since [Fe³⁺] ≫ [SCN⁻], essentially <strong>all SCN⁻ converts to FeSCN²⁺</strong>. Use dilution: [FeSCN²⁺] = (V<sub>SCN</sub> × M<sub>SCN</sub>) / V<sub>total</sub> where V<sub>total</sub> = 50.0 mL.</div>
+    <table class="ftable" style="margin-bottom:14px">
+      <thead><tr><th>Beaker</th><th>0.200 M Fe³⁺ (mL)</th><th>0.0020 M SCN⁻ (mL)</th><th>H₂O (mL)</th><th>Total (mL)</th><th>[FeSCN²⁺] (M)</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700">1</td><td class="finp given" style="text-align:center">5.0</td><td class="finp given" style="text-align:center">4.0</td><td class="finp given" style="text-align:center">41.0</td><td class="finp given" style="text-align:center">50.0</td><td><input class="finp" id="pre1" type="text" placeholder="e.g. 1.6×10⁻⁴"></td></tr>
+        <tr><td style="font-weight:700">2</td><td class="finp given" style="text-align:center">5.0</td><td class="finp given" style="text-align:center">3.0</td><td class="finp given" style="text-align:center">42.0</td><td class="finp given" style="text-align:center">50.0</td><td><input class="finp" id="pre2" type="text" placeholder="e.g. 1.2×10⁻⁴"></td></tr>
+        <tr><td style="font-weight:700">3</td><td class="finp given" style="text-align:center">5.0</td><td class="finp given" style="text-align:center">2.0</td><td class="finp given" style="text-align:center">43.0</td><td class="finp given" style="text-align:center">50.0</td><td><input class="finp" id="pre3" type="text" placeholder="e.g. 8.0×10⁻⁵"></td></tr>
+        <tr><td style="font-weight:700">4</td><td class="finp given" style="text-align:center">5.0</td><td class="finp given" style="text-align:center">1.0</td><td class="finp given" style="text-align:center">44.0</td><td class="finp given" style="text-align:center">50.0</td><td><input class="finp" id="pre4" type="text" placeholder="e.g. 4.0×10⁻⁵"></td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:12px">Hint: Beaker 1 → (4.0 mL × 0.0020 M) / 50.0 mL = ?</div>
+    <div class="brow"><button class="btn borange" onclick="checkPrelab()">Check &amp; Continue to Part I →</button></div>
+  </div>
+</div>
+
+<!-- ══ PART I ══ -->
+<div class="panel" id="p1">
+  <div class="snum">Part I · Procedures 1–8</div>
+  <div class="stitle">Prepare and Test Standard Solutions</div>
+  <div class="sdesc">Prepare 4 standard solutions of FeSCN²⁺ using excess Fe³⁺. Measure the absorbance of each at 470 nm. Build the Beer's Law calibration curve.</div>
+
+  <div class="card">
+    <div class="ctitle">Step-by-Step</div>
+    <div style="display:flex;flex-direction:column;gap:9px;font-size:.84rem;line-height:1.7">
+      <div style="display:flex;gap:11px"><span class="step-dot">1</span><span>Label beakers 1–4. Prepare each solution below using the exact volumes shown. Mix thoroughly. <strong>Important:</strong> measure absorbance within 2–5 minutes of mixing (FeSCN²⁺ is light-sensitive).</span></div>
+      <div style="display:flex;gap:11px"><span class="step-dot">2</span><span>Click <em>Mix Solutions</em> to prepare the beakers — observe the red color developing based on [FeSCN²⁺].</span></div>
+      <div style="display:flex;gap:11px"><span class="step-dot">3</span><span>Click <em>Measure Absorbance</em> for each beaker (Beaker 1 first). The colorimeter uses 470 nm (blue LED). Record each absorbance value.</span></div>
+      <div style="display:flex;gap:11px"><span class="step-dot">4</span><span>After all 4 are measured, click <em>Plot Calibration Curve</em> to generate the Beer's Law graph and linear regression equation.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Standard Beakers — Mixing Table</div>
+    <div class="beakers-row" id="beakers-p1"></div>
+    <div class="brow" style="justify-content:center;margin-top:16px">
+      <button class="dbtn" onclick="mixP1()">⚗ Mix Solutions</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Colorimeter — Absorbance Measurement (470 nm)</div>
+    <div class="colorimeter-wrap">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <div class="wavelength-badge">470 nm · Blue LED</div>
+        <svg width="120" height="90" viewBox="0 0 120 90" style="margin:4px 0">
+          <!-- Colorimeter body -->
+          <rect x="8" y="8" width="104" height="74" rx="5" fill="#2d3748" stroke="#1a202c" stroke-width="1.5"/>
+          <rect x="20" y="18" width="80" height="50" rx="3" fill="#1a202c"/>
+          <!-- Cuvette slot -->
+          <rect x="48" y="25" width="24" height="42" rx="2" fill="#f0f8ff" stroke="#4a6fa5" stroke-width="1.5" id="p1cuv"/>
+          <rect id="p1cuvliq" x="49" y="26" width="22" height="40" fill="transparent"/>
+          <!-- LED beam -->
+          <line x1="22" y1="46" x2="46" y2="46" stroke="#60a5fa" stroke-width="2" stroke-dasharray="3,2" opacity=".7"/>
+          <line x1="74" y1="46" x2="98" y2="46" stroke="#60a5fa" stroke-width="2" stroke-dasharray="3,2" opacity=".7"/>
+          <circle cx="18" cy="46" r="4" fill="#3b82f6" opacity=".9"/>
+          <circle cx="102" cy="46" r="4" fill="#16a34a" opacity=".9"/>
+        </svg>
+        <div id="p1-abs-display" class="abs-display">—</div>
+        <div class="abs-label">Absorbance</div>
+      </div>
+      <div style="flex:1;min-width:260px">
+        <table class="ftable" style="margin-bottom:12px">
+          <thead><tr><th>Beaker</th><th>[FeSCN²⁺] (M)</th><th>Absorbance</th><th>Action</th></tr></thead>
+          <tbody id="p1-data-table"></tbody>
+        </table>
+        <div id="p1-regression" style="font-family:var(--mono);font-size:.82rem;background:var(--bg2);padding:10px 14px;border-radius:2px;display:none;color:var(--navy);line-height:1.8">
+          Linear Regression: A = <strong id="p1-slope">—</strong> × [FeSCN²⁺] + <strong id="p1-int">—</strong><br>
+          R² = <strong id="p1-r2">—</strong>
+        </div>
+      </div>
+    </div>
+    <div class="brow" style="margin-top:12px">
+      <button class="btn boutline" id="btn-plot" onclick="plotP1()" disabled>📈 Plot Calibration Curve</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Beer's Law Calibration Curve</div>
+    <canvas id="chart-p1" width="620" height="340" style="max-width:100%;background:#fafaf8;border-radius:3px"></canvas>
+    <div style="font-size:.74rem;color:var(--muted);margin-top:6px">Absorbance (y) vs [FeSCN²⁺] (x). The slope = ε·b (molar absorptivity × path length).</div>
+    <div class="brow"><button class="btn borange" onclick="saveP1()">Save &amp; Continue to Part II →</button></div>
+  </div>
+</div>
+
+<!-- ══ PART II ══ -->
+<div class="panel" id="p2">
+  <div class="snum">Part II · Procedures 9–10 + ICE Tables</div>
+  <div class="stitle">Prepare and Test Equilibrium Systems</div>
+  <div class="sdesc">Prepare 3 equilibrium mixtures using equal concentrations of Fe³⁺ and SCN⁻. Measure absorbance, interpolate [FeSCN²⁺] from the calibration curve, then complete the ICE tables to find Keq.</div>
+
+  <div class="wbox">⚠ You are now using <strong>0.0020 M Fe(NO₃)₃</strong> (much lower concentration than Part I). Both Fe³⁺ and SCN⁻ are at equal concentrations — neither is in excess. An equilibrium is established.</div>
+
+  <div class="card">
+    <div class="ctitle">Equilibrium Beakers — Mixing Table</div>
+    <div class="beakers-row" id="beakers-p2"></div>
+    <div class="brow" style="justify-content:center;margin-top:16px">
+      <button class="dbtn" onclick="mixP2()">⚗ Mix Solutions</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">Colorimeter — Measure Absorbance + Interpolate [FeSCN²⁺]</div>
+    <div class="colorimeter-wrap">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+        <div class="wavelength-badge">470 nm · Blue LED</div>
+        <svg width="120" height="90" viewBox="0 0 120 90">
+          <rect x="8" y="8" width="104" height="74" rx="5" fill="#2d3748" stroke="#1a202c" stroke-width="1.5"/>
+          <rect x="20" y="18" width="80" height="50" rx="3" fill="#1a202c"/>
+          <rect x="48" y="25" width="24" height="42" rx="2" fill="#f0f8ff" stroke="#4a6fa5" stroke-width="1.5" id="p2cuv"/>
+          <rect id="p2cuvliq" x="49" y="26" width="22" height="40" fill="transparent"/>
+          <line x1="22" y1="46" x2="46" y2="46" stroke="#60a5fa" stroke-width="2" stroke-dasharray="3,2" opacity=".7"/>
+          <line x1="74" y1="46" x2="98" y2="46" stroke="#60a5fa" stroke-width="2" stroke-dasharray="3,2" opacity=".7"/>
+          <circle cx="18" cy="46" r="4" fill="#3b82f6" opacity=".9"/>
+          <circle cx="102" cy="46" r="4" fill="#16a34a" opacity=".9"/>
+        </svg>
+        <div id="p2-abs-display" class="abs-display">—</div>
+        <div class="abs-label">Absorbance</div>
+      </div>
+      <div style="flex:1;min-width:260px">
+        <table class="ftable" style="margin-bottom:12px">
+          <thead><tr><th>Beaker</th><th>Absorbance</th><th>[FeSCN²⁺] eq (M)</th><th>Action</th></tr></thead>
+          <tbody id="p2-data-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="ice-card" style="display:none">
+    <div class="ctitle">ICE Tables — Equilibrium Concentrations</div>
+    <div class="ibox">Use initial concentrations calculated from the mixing chart, and the [FeSCN²⁺] at equilibrium (from your colorimeter readings above). Then: [Fe³⁺]eq = [Fe³⁺]i − [FeSCN²⁺]eq, and [SCN⁻]eq = [SCN⁻]i − [FeSCN²⁺]eq.</div>
+    <div id="ice-tables-container"></div>
+    <div class="brow">
+      <button class="btn borange" onclick="calcKeq()">Calculate Keq →</button>
+    </div>
+  </div>
+
+  <div class="card" id="keq-card" style="display:none">
+    <div class="ctitle">Equilibrium Constant Results</div>
+    <table class="ftable" style="margin-bottom:14px">
+      <thead><tr><th>Beaker</th><th>[FeSCN²⁺]eq</th><th>[Fe³⁺]eq</th><th>[SCN⁻]eq</th><th>Keq</th></tr></thead>
+      <tbody id="keq-table-body"></tbody>
+    </table>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:8px">
+      <div style="font-size:.85rem;font-weight:600;color:var(--navy)">Average Keq =</div>
+      <div class="rbox" id="keq-avg">—</div>
+      <div style="font-size:.78rem;color:var(--muted)">(Literature value: ~900–1200 M⁻¹)</div>
+    </div>
+    <div class="brow"><button class="btn borange" onclick="saveP2()">Save &amp; Continue to MCQ →</button></div>
+  </div>
+</div>
+
+<!-- ══ MCQ ══ -->
+<div class="panel" id="p3">
+  <div class="snum">Post-Lab Quiz</div>
+  <div class="stitle">Multiple Choice Questions</div>
+  <div class="sdesc">Answer all 4 questions. Each question has a 90-second timer and advances automatically when it expires.</div>
+  <div id="mcqBody"></div>
+</div>
+
+<!-- ══ DRA ══ -->
+<div class="panel" id="p4">
+  <div class="snum">DRA · Data Recording &amp; Analysis</div>
+  <div class="stitle">Analysis Questions</div>
+  <div class="sdesc">Answer all 5 questions. Each has an individual 5-minute timer that starts on your first keystroke and locks when it expires. Pasting is not allowed.</div>
+  <div class="wbox">⏱ Timers start individually when you begin typing. Write directly — do not copy-paste.</div>
+
+  <div class="qblock"><div class="qhdr"><div><div class="qnum">Q1 — Standard Curve &amp; Beer's Law</div><div class="qpts">/ 2 pts</div></div><div class="qtimer" id="qt1">⏱ waiting…</div></div>
+  <div class="qtext">In Part I, explain why all of the SCN⁻ was converted to FeSCN²⁺. Using your calibration data, write the linear regression equation (Absorbance vs [FeSCN²⁺]). What does the slope represent physically? Does your graph pass through the origin? Why or why not?</div>
+  <textarea class="qans" id="dra1" placeholder="Write your answer here…"></textarea>
+  <div class="qlocked" id="ql1">⏱ Time expired — answer locked.</div></div>
+
+  <div class="qblock"><div class="qhdr"><div><div class="qnum">Q2 — ICE Table &amp; Equilibrium Concentrations</div><div class="qpts">/ 2 pts</div></div><div class="qtimer" id="qt2">⏱ waiting…</div></div>
+  <div class="qtext">For Beaker A (Part II), show how you calculated the initial concentrations of Fe³⁺ and SCN⁻ (using dilution). Then complete a full ICE table showing Initial, Change, and Equilibrium concentrations for all three species. Use [FeSCN²⁺] determined from the calibration curve.</div>
+  <textarea class="qans" id="dra2" placeholder="Write your answer here…"></textarea>
+  <div class="qlocked" id="ql2">⏱ Time expired — answer locked.</div></div>
+
+  <div class="qblock"><div class="qhdr"><div><div class="qnum">Q3 — Keq Calculation</div><div class="qpts">/ 2 pts</div></div><div class="qtimer" id="qt3">⏱ waiting…</div></div>
+  <div class="qtext">Using the equilibrium concentrations from your ICE tables for beakers A, B, and C, calculate Keq for each beaker. Show your work for one beaker in detail. Are the three Keq values consistent with each other? What is the average Keq? How does it compare to the literature value (~1000 M⁻¹)?</div>
+  <textarea class="qans" id="dra3" placeholder="Write your answer here…"></textarea>
+  <div class="qlocked" id="ql3">⏱ Time expired — answer locked.</div></div>
+
+  <div class="qblock"><div class="qhdr"><div><div class="qnum">Q4 — Sources of Error</div><div class="qpts">/ 2 pts</div></div><div class="qtimer" id="qt4">⏱ waiting…</div></div>
+  <div class="qtext">Identify two potential sources of experimental error in this experiment. For each: (a) describe the error, (b) state whether it would cause Keq to be higher or lower than the true value, and (c) explain how to minimize it. Consider sources from both the colorimetric measurement and the solution preparation.</div>
+  <textarea class="qans" id="dra4" placeholder="Write your answer here…"></textarea>
+  <div class="qlocked" id="ql4">⏱ Time expired — answer locked.</div></div>
+
+  <div class="qblock"><div class="qhdr"><div><div class="qnum">Q5 — Written Procedure</div><div class="qpts">/ 2 pts</div></div><div class="qtimer" id="qt5">⏱ waiting…</div></div>
+  <div class="qtext">Write a concise numbered experimental procedure covering both Part I and Part II. Include: reagents and their concentrations, volumes used, equipment (colorimeter, cuvette, graduated cylinders), the calibration step, the method for determining [FeSCN²⁺] from absorbance, and the ICE table method. Aim for at least 12 numbered steps.</div>
+  <textarea class="qans" id="dra5" placeholder="1. Obtain goggles and label four small beakers 1–4.&#10;2. …" style="min-height:130px"></textarea>
+  <div class="qlocked" id="ql5">⏱ Time expired — answer locked.</div></div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:40px;margin-top:6px">
+    <div><div style="font-size:.71rem;font-weight:700;color:var(--navy)">Total Available</div>
+      <div style="font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--navy)">10 pts</div></div>
+    <button class="btn borange" style="padding:13px 26px;font-size:.9rem" onclick="dlReport()">⬇ Download Report (HTML → PDF)</button>
+  </div>
+</div>
+
+  </div><!-- lab shell -->
+</div><!-- s-lab -->
+
+<script>
+// ══ GLOBALS ══
+const STU={name:'',id:'',sec:''};
+let timerSecs=5400,timerInt=null;
+
+// Chemistry data
+const PART1_DATA=[
+  {bkr:1, scn_mL:4.0, h2o_mL:41.0, fescn:1.60e-4, abs:0.737},
+  {bkr:2, scn_mL:3.0, h2o_mL:42.0, fescn:1.20e-4, abs:0.547},
+  {bkr:3, scn_mL:2.0, h2o_mL:43.0, fescn:8.00e-5, abs:0.366},
+  {bkr:4, scn_mL:1.0, h2o_mL:44.0, fescn:4.00e-5, abs:0.181},
+];
+const SLOPE=4622.5, INTERCEPT=-0.0045; // Beer's law from regression
+const PART2_DATA=[
+  {bkr:'A', fe_mL:3, scn_mL:3, h2o_mL:4, total:10,
+   fe_i:6.0e-4, scn_i:6.0e-4, fescn_eq:1.917e-4, fe_eq:4.083e-4, scn_eq:4.083e-4, abs:0.882, Keq:1150},
+  {bkr:'B', fe_mL:3, scn_mL:4, h2o_mL:3, total:10,
+   fe_i:6.0e-4, scn_i:8.0e-4, fescn_eq:2.360e-4, fe_eq:3.640e-4, scn_eq:5.640e-4, abs:1.087, Keq:1150},
+  {bkr:'C', fe_mL:3, scn_mL:5, h2o_mL:2, total:10,
+   fe_i:6.0e-4, scn_i:1.0e-3, fescn_eq:2.732e-4, fe_eq:3.268e-4, scn_eq:7.268e-4, abs:1.258, Keq:1150},
+];
+const TEMP=22.3; // °C
+
+let p1Mixed=false, p2Mixed=false;
+let p1Measured=[false,false,false,false];
+let p2Measured=[false,false,false];
+let qtimers={},qsecs={};
+let mcqAnswers={},mcqSubmitted=false,mcqQTimers={},mcqActiveSecs={};
+
+// ── TOAST ──
+function toast(m,ms=2800){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),ms);}
+
+// ── TIMER ──
+function startTimer(){
+  timerInt=setInterval(()=>{
+    timerSecs--;
+    const m=Math.floor(timerSecs/60),s=timerSecs%60;
+    const el=document.getElementById('timer');
+    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el.className=timerSecs<=60?'danger':timerSecs<=180?'warn':'';
+    if(timerSecs===180)toast('⚠ 3 minutes remaining!',4000);
+    if(timerSecs<=0){clearInterval(timerInt);dlReport();setTimeout(()=>document.getElementById('overlay').classList.add('on'),800);}
+  },1000);
+}
+
+// ── LOGIN ──
+function startLab(){
+  const n=document.getElementById('inp-name').value.trim();
+  const id=document.getElementById('inp-id').value.trim();
+  if(!n||!id){toast('⚠ Enter your name and ID.');return;}
+  STU.name=n;STU.id=id;STU.sec=document.getElementById('inp-sec').value.trim();
+  document.getElementById('tb-stu').textContent=n+' · '+id;
+  document.getElementById('s-login').classList.remove('active');
+  document.getElementById('s-lab').classList.add('active');
+  buildP1Beakers();buildP2Beakers();buildP1Table();buildP2Table();
+  startTimer();
+}
+
+// ── TABS (display only, no click) ──
+function goTab(n){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+}
+
+// ── COLOR HELPERS ──
+function fescnToColor(conc){
+  // Scale color intensity: max ~3e-4 M = deepest red
+  const pct=Math.min(1,conc/3e-4);
+  const r=Math.round(80+pct*128);
+  const g=Math.round(30-pct*10);
+  const b=Math.round(20-pct*10);
+  return `rgba(${r},${g},${b},${0.25+pct*0.7})`;
+}
+
+// ── BUILD BEAKER SVG ──
+function beakerSVG(label, sublabel, color, id){
+  return `<div class="bkr-wrap">
+    <svg width="80" height="100" viewBox="0 0 80 100" id="bsvg-${id}">
+      <defs><clipPath id="bc${id}"><polygon points="12,12 68,12 62,88 18,88"/></clipPath></defs>
+      <!-- body -->
+      <polygon points="12,12 68,12 62,88 18,88" fill="#f0f8ff" stroke="#7fb3d3" stroke-width="1.5"/>
+      <!-- liquid -->
+      <rect id="bliq-${id}" x="13" y="42" width="54" height="46" clip-path="url(#bc${id})" fill="${color}" style="transition:fill .6s"/>
+      <!-- outline again on top -->
+      <polygon points="12,12 68,12 62,88 18,88" fill="none" stroke="#7fb3d3" stroke-width="1.5"/>
+      <line x1="6" y1="12" x2="74" y2="12" stroke="#7fb3d3" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- label inside -->
+      <text x="40" y="75" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" font-weight="700" fill="rgba(255,255,255,.9)" id="blbl-${id}"></text>
+    </svg>
+    <div class="bkr-label">${label}</div>
+    <div class="bkr-conc" id="bconc-${id}">${sublabel}</div>
+  </div>`;
+}
+
+function buildP1Beakers(){
+  const c=document.getElementById('beakers-p1');
+  c.innerHTML=PART1_DATA.map(d=>beakerSVG('Beaker '+d.bkr,`Fe³⁺: 5.0 mL | SCN⁻: ${d.scn_mL} mL | H₂O: ${d.h2o_mL} mL`,'#ddeeff','p1b'+d.bkr)).join('');
+}
+
+function buildP2Beakers(){
+  const c=document.getElementById('beakers-p2');
+  c.innerHTML=PART2_DATA.map(d=>beakerSVG('Beaker '+d.bkr,`Fe³⁺: ${d.fe_mL} mL | SCN⁻: ${d.scn_mL} mL | H₂O: ${d.h2o_mL} mL`,'#ddeeff','p2b'+d.bkr)).join('');
+}
+
+function mixP1(){
+  p1Mixed=true;
+  PART1_DATA.forEach(d=>{
+    const liq=document.getElementById('bliq-p1b'+d.bkr);
+    if(liq) liq.setAttribute('fill',fescnToColor(d.fescn));
+    const lbl=document.getElementById('blbl-p1b'+d.bkr);
+    if(lbl) lbl.textContent=d.fescn.toExponential(1)+' M';
+  });
+  toast('Solutions mixed! Measure absorbance within 2–5 minutes.');
+}
+
+function mixP2(){
+  p2Mixed=true;
+  PART2_DATA.forEach(d=>{
+    const liq=document.getElementById('bliq-p2b'+d.bkr);
+    if(liq) liq.setAttribute('fill',fescnToColor(d.fescn_eq));
+    const lbl=document.getElementById('blbl-p2b'+d.bkr);
+    if(lbl) lbl.textContent='A='+d.abs.toFixed(3);
+  });
+  toast('Equilibrium mixtures prepared — measure absorbance now.');
+}
+
+// ── PART I TABLE ──
+function buildP1Table(){
+  const body=document.getElementById('p1-data-table');
+  PART1_DATA.forEach((d,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:700">${d.bkr}</td>
+      <td style="font-family:var(--mono)">${d.fescn.toExponential(2)}</td>
+      <td><input class="finp given" id="p1abs${d.bkr}" value="" readonly placeholder="—"></td>
+      <td><button class="dbtn" style="padding:5px 12px;font-size:.75rem" onclick="measureP1(${d.bkr})" id="btnm${d.bkr}">Measure</button></td>`;
+    body.appendChild(tr);
+  });
+}
+
+function measureP1(n){
+  if(!p1Mixed){toast('⚠ Mix solutions first.');return;}
+  const d=PART1_DATA[n-1];
+  // Show in colorimeter
+  document.getElementById('p1cuvliq').setAttribute('fill',fescnToColor(d.fescn));
+  document.getElementById('p1-abs-display').textContent=d.abs.toFixed(3);
+  document.getElementById('p1abs'+n).value=d.abs.toFixed(3);
+  document.getElementById('btnm'+n).disabled=true;
+  document.getElementById('btnm'+n).textContent='✓ Done';
+  p1Measured[n-1]=true;
+  toast('Absorbance for Beaker '+n+' = '+d.abs.toFixed(3));
+  if(p1Measured.every(Boolean)){
+    document.getElementById('btn-plot').disabled=false;
+    toast('All 4 measured! Click "Plot Calibration Curve".',3000);
+  }
+}
+
+function plotP1(){
+  // Show regression
+  document.getElementById('p1-slope').textContent=SLOPE.toFixed(1)+' M⁻¹';
+  document.getElementById('p1-int').textContent=INTERCEPT.toFixed(4);
+  document.getElementById('p1-r2').textContent='0.9997';
+  document.getElementById('p1-regression').style.display='block';
+  drawCalibrationChart();
+  toast('Calibration curve plotted! R² = 0.9997 — excellent linearity.');
+}
+
+function drawCalibrationChart(){
+  const cv=document.getElementById('chart-p1');
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  const pd={l:62,r:20,t:22,b:52};
+  const cw=W-pd.l-pd.r,ch=H-pd.t-pd.b;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#fafaf8';ctx.fillRect(0,0,W,H);
+
+  // Grid
+  const xmax=2e-4,ymax=0.85;
+  ctx.strokeStyle='#eee';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){
+    const y=pd.t+ch*(1-i*0.2/ymax*ymax);
+    ctx.beginPath();ctx.moveTo(pd.l,pd.t+ch*(1-i/4));ctx.lineTo(pd.l+cw,pd.t+ch*(1-i/4));ctx.stroke();
+    ctx.fillStyle='#aaa';ctx.font='10px monospace';
+    ctx.fillText((i*0.2).toFixed(1),pd.l-38,pd.t+ch*(1-i/4)+4);
+  }
+  for(let i=0;i<=4;i++){
+    const x=pd.l+(i/4)*cw;
+    ctx.beginPath();ctx.moveTo(x,pd.t);ctx.lineTo(x,pd.t+ch);ctx.stroke();
+    ctx.fillStyle='#aaa';ctx.font='10px monospace';
+    const v=(i*0.5e-4).toExponential(1);
+    ctx.fillText(v,x-18,pd.t+ch+16);
+  }
+
+  // Axes
+  ctx.strokeStyle='#bbb';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pd.l,pd.t);ctx.lineTo(pd.l,pd.t+ch);ctx.lineTo(pd.l+cw,pd.t+ch);ctx.stroke();
+
+  // Axis labels
+  ctx.save();ctx.translate(14,pd.t+ch/2);ctx.rotate(-Math.PI/2);
+  ctx.fillStyle='#444';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+  ctx.fillText('Absorbance',0,0);ctx.restore();
+  ctx.fillStyle='#444';ctx.font='bold 11px sans-serif';ctx.textAlign='center';
+  ctx.fillText('[FeSCN²⁺] (M)',pd.l+cw/2,H-5);
+
+  // Regression line
+  ctx.strokeStyle='var(--orange)';ctx.lineWidth=2;ctx.beginPath();
+  ctx.moveTo(pd.l,pd.t+ch*(1-(-0.0045)/ymax));
+  ctx.lineTo(pd.l+cw,pd.t+ch*(1-(SLOPE*2e-4+INTERCEPT)/ymax));
+  ctx.stroke();
+
+  // Data points
+  PART1_DATA.forEach(d=>{
+    const x=pd.l+(d.fescn/2e-4)*cw;
+    const y=pd.t+ch*(1-d.abs/ymax);
+    ctx.fillStyle=fescnToColor(d.fescn);
+    ctx.strokeStyle='var(--rust)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(x,y,7,0,2*Math.PI);ctx.fill();ctx.stroke();
+    ctx.fillStyle='var(--navy)';ctx.font='bold 10px monospace';
+    ctx.fillText(d.bkr,x+9,y+4);
+  });
+
+  // Equation label
+  ctx.fillStyle='var(--navy)';ctx.font='12px monospace';
+  ctx.fillText('A = '+SLOPE.toFixed(0)+' × [FeSCN²⁺] − 0.0045',pd.l+10,pd.t+20);
+  ctx.fillStyle='var(--muted)';ctx.font='11px monospace';
+  ctx.fillText('R² = 0.9997',pd.l+10,pd.t+36);
+}
+
+function saveP1(){
+  if(!p1Measured.every(Boolean)){toast('⚠ Measure all 4 beakers first.');return;}
+  document.getElementById('tab1').classList.add('done');
+  toast('✓ Part I saved!',1800);setTimeout(()=>goTab(2),600);
+}
+
+// ── PART II TABLE + ICE ──
+function buildP2Table(){
+  const body=document.getElementById('p2-data-table');
+  PART2_DATA.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:700">${d.bkr}</td>
+      <td><input class="finp given" id="p2abs${d.bkr}" value="" readonly placeholder="—"></td>
+      <td><input class="finp given" id="p2fescn${d.bkr}" value="" readonly placeholder="—"></td>
+      <td><button class="dbtn" style="padding:5px 12px;font-size:.75rem" onclick="measureP2('${d.bkr}')" id="btnm2${d.bkr}">Measure</button></td>`;
+    body.appendChild(tr);
+  });
+}
+
+function measureP2(lbl){
+  if(!p2Mixed){toast('⚠ Mix solutions first.');return;}
+  const d=PART2_DATA.find(x=>x.bkr===lbl);
+  document.getElementById('p2cuvliq').setAttribute('fill',fescnToColor(d.fescn_eq));
+  document.getElementById('p2-abs-display').textContent=d.abs.toFixed(3);
+  document.getElementById('p2abs'+lbl).value=d.abs.toFixed(3);
+  // Interpolate [FeSCN²⁺] from calibration: C = (A - intercept) / slope
+  const conc=(d.abs-INTERCEPT)/SLOPE;
+  document.getElementById('p2fescn'+lbl).value=conc.toExponential(3);
+  document.getElementById('btnm2'+lbl).disabled=true;
+  document.getElementById('btnm2'+lbl).textContent='✓ Done';
+  p2Measured[['A','B','C'].indexOf(lbl)]=true;
+  toast('Beaker '+lbl+': A='+d.abs.toFixed(3)+' → [FeSCN²⁺]eq = '+conc.toExponential(3)+' M');
+  if(p2Measured.every(Boolean)){
+    buildICETables();
+    document.getElementById('ice-card').style.display='block';
+    toast('All measured! Complete the ICE tables.',3000);
+  }
+}
+
+function buildICETables(){
+  const c=document.getElementById('ice-tables-container');
+  c.innerHTML='';
+  PART2_DATA.forEach(d=>{
+    const fescn=(d.abs-INTERCEPT)/SLOPE;
+    const feI=d.fe_i.toExponential(3),scnI=d.scn_i.toExponential(3);
+    const fescnEqF=fescn.toExponential(3);
+    const div=document.createElement('div');
+    div.style.marginBottom='18px';
+    div.innerHTML=`
+      <div style="font-family:var(--mono);font-size:.78rem;font-weight:700;color:var(--navy);margin-bottom:7px">Beaker ${d.bkr}</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">
+        [Fe³⁺]ᵢ = (${d.fe_mL}.00 mL × 0.0020 M) / ${d.total}.0 mL = <strong style="color:var(--teal)">${feI} M</strong>&nbsp;&nbsp;
+        [SCN⁻]ᵢ = (${d.scn_mL}.00 mL × 0.0020 M) / ${d.total}.0 mL = <strong style="color:var(--teal)">${scnI} M</strong>
+      </div>
+      <div class="ice-wrap">
+        <table class="ice-table">
+          <thead>
+            <tr>
+              <th class="row-lbl" style="width:100px"></th>
+              <th class="species">Fe³⁺ (aq)</th>
+              <th class="species">SCN⁻ (aq)</th>
+              <th class="species">FeSCN²⁺ (aq)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-name">Initial (M)</td>
+              <td class="ice-given">${feI}</td>
+              <td class="ice-given">${scnI}</td>
+              <td class="ice-given">0.000</td>
+            </tr>
+            <tr>
+              <td class="row-name">Change (M)</td>
+              <td class="ice-calc">−${fescnEqF}</td>
+              <td class="ice-calc">−${fescnEqF}</td>
+              <td class="ice-calc">+${fescnEqF}</td>
+            </tr>
+            <tr>
+              <td class="row-name">Equilibrium (M)</td>
+              <td class="ice-calc" id="ice-fe-${d.bkr}">—</td>
+              <td class="ice-calc" id="ice-scn-${d.bkr}">—</td>
+              <td class="ice-given">${fescnEqF}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`;
+    c.appendChild(div);
+  });
+}
+
+function calcKeq(){
+  const body=document.getElementById('keq-table-body');
+  body.innerHTML='';
+  let sum=0;
+  PART2_DATA.forEach(d=>{
+    const fescn=(d.abs-INTERCEPT)/SLOPE;
+    const feEq=d.fe_i-fescn;
+    const scnEq=d.scn_i-fescn;
+    const Keq=fescn/(feEq*scnEq);
+    // Fill equilibrium cells in ICE table
+    const feEl=document.getElementById('ice-fe-'+d.bkr);
+    const scnEl=document.getElementById('ice-scn-'+d.bkr);
+    if(feEl) feEl.textContent=feEq.toExponential(3);
+    if(scnEl) scnEl.textContent=scnEq.toExponential(3);
+    sum+=Keq;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:700">${d.bkr}</td>
+      <td style="font-family:var(--mono)">${fescn.toExponential(3)}</td>
+      <td style="font-family:var(--mono)">${feEq.toExponential(3)}</td>
+      <td style="font-family:var(--mono)">${scnEq.toExponential(3)}</td>
+      <td style="font-family:var(--mono);font-weight:700;color:var(--orange)">${Keq.toFixed(0)}</td>`;
+    body.appendChild(tr);
+  });
+  const avg=sum/PART2_DATA.length;
+  document.getElementById('keq-avg').textContent=avg.toFixed(0)+' M⁻¹';
+  document.getElementById('keq-card').style.display='block';
+  toast('Keq calculated! Average = '+avg.toFixed(0)+' M⁻¹');
+}
+
+function saveP2(){
+  document.getElementById('tab2').classList.add('done');
+  toast('✓ Part II saved!',1800);
+  setTimeout(()=>{goTab(3);initMCQ();},600);
+}
+
+// ══ MCQ ══
+const MCQ_QUESTIONS=[
+  {
+    q:"In Part I, why is Fe³⁺ used in large excess (0.200 M) while SCN⁻ is at 0.0020 M?",
+    opts:[
+      "Fe³⁺ is cheaper so more is used",
+      "Excess Fe³⁺ ensures all SCN⁻ converts to FeSCN²⁺, so [FeSCN²⁺] = initial [SCN⁻]",
+      "Excess Fe³⁺ prevents the solution from becoming too acidic",
+      "SCN⁻ is toxic so less is used"
+    ],
+    ans:1,
+    exp:"When [Fe³⁺] ≫ [SCN⁻], the equilibrium shifts far right and virtually all SCN⁻ is converted to FeSCN²⁺. This makes [FeSCN²⁺] = initial [SCN⁻] (after dilution), giving known concentrations for the Beer's Law calibration."
+  },
+  {
+    q:"Beer's Law states A = εbc. In this experiment, what does the SLOPE of the Absorbance vs [FeSCN²⁺] graph represent?",
+    opts:[
+      "The molar mass of FeSCN²⁺",
+      "The wavelength of light used (470 nm)",
+      "The product ε × b (molar absorptivity × path length)",
+      "The equilibrium constant Keq"
+    ],
+    ans:2,
+    exp:"In Beer's Law, A = εbc, where ε is the molar absorptivity (L mol⁻¹ cm⁻¹), b is the path length (cm), and c is the concentration (mol/L). Since b = 1 cm (standard cuvette), the slope of A vs c equals ε × b = ε. This is the calibration factor used to convert absorbance to concentration in Part II."
+  },
+  {
+    q:"In an ICE table for this reaction, if [Fe³⁺]ᵢ = 6.0 × 10⁻⁴ M, [SCN⁻]ᵢ = 6.0 × 10⁻⁴ M, and [FeSCN²⁺]eq = 1.9 × 10⁻⁴ M, what is [Fe³⁺]eq?",
+    opts:[
+      "6.0 × 10⁻⁴ M (unchanged)",
+      "7.9 × 10⁻⁴ M",
+      "4.1 × 10⁻⁴ M",
+      "1.9 × 10⁻⁴ M"
+    ],
+    ans:2,
+    exp:"From the ICE table, the change in [Fe³⁺] equals −[FeSCN²⁺]eq (1:1:1 stoichiometry). So [Fe³⁺]eq = [Fe³⁺]ᵢ − [FeSCN²⁺]eq = 6.0×10⁻⁴ − 1.9×10⁻⁴ = 4.1×10⁻⁴ M."
+  },
+  {
+    q:"A student finds Keq values of 1050, 1180, and 920 M⁻¹ for beakers A, B, and C. Which conclusion is most appropriate?",
+    opts:[
+      "The experiment failed — Keq must be identical for all three beakers",
+      "The results are consistent; variation is due to experimental error. Average Keq ≈ 1050 M⁻¹",
+      "Keq changes with concentration, so each beaker has a different Keq",
+      "Only the highest value (1180) should be reported"
+    ],
+    ans:1,
+    exp:"Keq depends only on temperature, not concentration. The three beakers have different initial concentrations but should give similar Keq values. Small variations (±10–20%) are expected due to measurement uncertainties (absorbance readings, pipetting errors). Averaging gives a more reliable result (~1050 M⁻¹ here, close to the literature value of ~1000 M⁻¹)."
+  }
+];
+
+function initMCQ(){
+  const body=document.getElementById('mcqBody');
+  if(!body)return;
+  body.innerHTML='';
+  mcqAnswers={};mcqSubmitted=false;mcqQTimers={};mcqActiveSecs={};
+  MCQ_QUESTIONS.forEach((q,i)=>{
+    const card=document.createElement('div');
+    card.className='mcq-card';card.id='mc'+i;
+    if(i>0)card.style.display='none';
+    card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+      <div class="mcq-qnum">Question ${i+1} of ${MCQ_QUESTIONS.length}</div>
+      <div class="mcq-timer" id="mct${i}">⏱ 1:30</div></div>
+      <div class="mcq-qtext">${q.q}</div>
+      <div class="mcq-opts" id="mco${i}">
+        ${q.opts.map((o,j)=>`<label class="mcq-opt" id="mcoo${i}_${j}"><input type="radio" name="mcq${i}" value="${j}" onchange="selMCQ(${i},${j})"><span>${o}</span></label>`).join('')}
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:13px">
+        ${i<MCQ_QUESTIONS.length-1
+          ?`<button class="btn borange" onclick="nextMCQ(${i})" id="mcnxt${i}" style="font-size:.79rem;padding:8px 18px">Next Question →</button>`
+          :`<button class="btn borange" onclick="submitMCQ()" id="mcfin${i}" style="font-size:.79rem;padding:8px 18px">Submit Quiz ✓</button>`}
+      </div>`;
+    body.appendChild(card);
+  });
+  startMCQT(0);
+}
+
+function startMCQT(i){
+  if(mcqSubmitted)return;
+  let s=90;mcqActiveSecs[i]=s;
+  const el=document.getElementById('mct'+i);
+  mcqQTimers[i]=setInterval(()=>{
+    s--;mcqActiveSecs[i]=s;
+    const m=Math.floor(s/60),sec=s%60;
+    if(el){el.textContent='⏱ '+m+':'+(sec<10?'0':'')+sec;el.className='mcq-timer'+(s<=30?' warn':'');}
+    if(s<=0){clearInterval(mcqQTimers[i]);if(el){el.className='mcq-timer exp';el.textContent='⏱ Expired';}lockMCQ(i);if(i<MCQ_QUESTIONS.length-1)setTimeout(()=>advMCQ(i),700);else setTimeout(submitMCQ,700);}
+  },1000);
+}
+
+function lockMCQ(i){
+  document.querySelectorAll('#mco'+i+' .mcq-opt').forEach(el=>{el.style.cursor='default';const inp=el.querySelector('input');if(inp)inp.disabled=true;});
+  const nb=document.getElementById('mcnxt'+i),fb=document.getElementById('mcfin'+i);
+  if(nb)nb.disabled=true;if(fb)fb.disabled=true;
+}
+
+function selMCQ(qi,oi){if(mcqSubmitted)return;mcqAnswers[qi]=oi;document.querySelectorAll('#mco'+qi+' .mcq-opt').forEach((el,j)=>el.classList.toggle('selected',j===oi));}
+
+function nextMCQ(i){clearInterval(mcqQTimers[i]);lockMCQ(i);advMCQ(i);}
+function advMCQ(i){const cur=document.getElementById('mc'+i),nxt=document.getElementById('mc'+(i+1));if(cur)cur.style.opacity='.5';if(nxt){nxt.style.display='';nxt.scrollIntoView({behavior:'smooth',block:'center'});}startMCQT(i+1);}
+
+function submitMCQ(){
+  if(mcqSubmitted)return;mcqSubmitted=true;
+  let score=0;
+  MCQ_QUESTIONS.forEach((q,i)=>{
+    if(mcqAnswers[i]===q.ans)score++;lockMCQ(i);
+    const exp=document.createElement('div');
+    exp.style.cssText='margin-top:10px;padding:10px 14px;background:#f9f0e0;border-radius:2px;font-size:.78rem;color:#3d2c00;line-height:1.55;border-left:3px solid var(--gold)';
+    exp.innerHTML='<strong>Explanation:</strong> '+q.exp;
+    document.getElementById('mc'+i).appendChild(exp);
+  });
+  window.mcqScore=score;
+  const pct=Math.round(score/MCQ_QUESTIONS.length*100);
+  const banner=document.createElement('div');
+  banner.className='score-banner';
+  banner.innerHTML=`<div><div style="font-size:.77rem;opacity:.7;font-weight:600;text-transform:uppercase;letter-spacing:.8px">Quiz Score</div>
+    <div class="score-num">${score} / ${MCQ_QUESTIONS.length}</div>
+    <div class="score-fb">${pct>=75?'✓ Proceed to the analysis questions.':'Review explanations above before continuing.'}</div></div>
+    <button class="btn borange" style="font-size:.88rem;padding:12px 22px" onclick="goTab(4)">Continue to DRA →</button>`;
+  document.getElementById('mcqBody').insertBefore(banner,document.getElementById('mcqBody').firstChild);
+  window.scrollTo(0,0);
+  document.getElementById('tab3').classList.add('done');
+}
+
+// ── DRA TIMERS ──
+function startQT(q){
+  if(qtimers[q])return;qsecs[q]=300;
+  const el=document.getElementById('qt'+q);
+  qtimers[q]=setInterval(()=>{
+    qsecs[q]--;
+    const m=Math.floor(qsecs[q]/60),s=qsecs[q]%60;
+    el.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    el.className='qtimer'+(qsecs[q]<=60?' warn':'');
+    if(qsecs[q]<=0){clearInterval(qtimers[q]);el.textContent='00:00';el.className='qtimer exp';document.getElementById('dra'+q).disabled=true;document.getElementById('ql'+q).style.display='block';}
+  },1000);
+}
+
+// ── PRE-LAB CHECK ──
+const PRE_ANSWERS=[1.60e-4,1.20e-4,8.00e-5,4.00e-5];
+function checkPrelab(){
+  let allOk=true;
+  [1,2,3,4].forEach(i=>{
+    const val=parseFloat(document.getElementById('pre'+i).value.replace(/[×x]/g,'e').replace(/\s/g,''));
+    const correct=PRE_ANSWERS[i-1];
+    const el=document.getElementById('pre'+i);
+    if(isNaN(val)){el.className='finp bad';allOk=false;}
+    else{
+      const ratio=val/correct;
+      el.className='finp '+(ratio>0.85&&ratio<1.15?'ok':'bad');
+      if(ratio<=0.85||ratio>=1.15)allOk=false;
+    }
+  });
+  if(!allOk){toast('⚠ Some answers are incorrect. Hint: [FeSCN²⁺] = (V_SCN × 0.0020) / 50.0');return;}
+  document.getElementById('tab0').classList.add('done');
+  toast('✓ Pre-lab correct!',1800);setTimeout(()=>goTab(1),600);
+}
+
+// ── REPORT ──
+function dlReport(){
+  const p1rows=PART1_DATA.map(d=>`<tr><td>${d.bkr}</td><td>${d.fescn.toExponential(2)}</td><td>${d.abs.toFixed(3)}</td></tr>`).join('');
+  const p2rows=PART2_DATA.map(d=>{
+    const fescn=(d.abs-INTERCEPT)/SLOPE;
+    const feEq=d.fe_i-fescn,scnEq=d.scn_i-fescn;
+    const Keq=fescn/(feEq*scnEq);
+    return `<tr><td>${d.bkr}</td><td>${d.abs.toFixed(3)}</td><td>${fescn.toExponential(3)}</td><td>${feEq.toExponential(3)}</td><td>${scnEq.toExponential(3)}</td><td>${Keq.toFixed(0)}</td></tr>`;
+  }).join('');
+  const avgKeq=PART2_DATA.reduce((s,d)=>{const f=(d.abs-INTERCEPT)/SLOPE;const fe=d.fe_i-f,scn=d.scn_i-f;return s+f/(fe*scn);},0)/PART2_DATA.length;
+  const drar=[1,2,3,4,5].map(q=>`<tr><td style="font-weight:600;background:#f4f7fb;padding:8px 11px;vertical-align:top;width:16%">Q${q}</td><td style="padding:8px 11px;white-space:pre-wrap">${(document.getElementById('dra'+q)||{}).value||'—'}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Exp 10 — ${STU.name}</title>
+<style>body{font-family:Arial,sans-serif;max-width:900px;margin:32px auto;font-size:13.5px}
+h1{color:#12243a;font-size:20px;border-bottom:3px solid #c45e1a;padding-bottom:7px}
+h2{color:#c45e1a;font-size:14px;margin-top:22px}
+table{width:100%;border-collapse:collapse;margin-bottom:13px}
+th{background:#12243a;color:#fff;padding:7px 10px;font-size:12px;text-align:left}
+td{padding:7px 10px;border-bottom:1px solid #e0e0e0;vertical-align:top}
+.stamp{text-align:right;color:#aaa;font-size:10px}</style>
+</head><body>
+<h1>⚗ Experiment 10 — Determination of Keq (Fe³⁺ + SCN⁻ ⇌ FeSCN²⁺)</h1>
+<div style="color:#555;font-size:12px"><strong>Student:</strong> ${STU.name} | <strong>ID:</strong> ${STU.id} | <strong>Section:</strong> ${STU.sec||'—'} | <strong>Temp:</strong> ${TEMP}°C | <strong>MCQ:</strong> ${typeof window.mcqScore!='undefined'?window.mcqScore+'/4':'N/A'}</div>
+<div class="stamp">Downloaded ${new Date().toLocaleString()}</div>
+<h2>Part I — Standard Curve (Beer's Law)</h2>
+<p>Linear regression: A = ${SLOPE.toFixed(0)} × [FeSCN²⁺] − 0.0045 &nbsp;|&nbsp; R² = 0.9997</p>
+<table><thead><tr><th>Beaker</th><th>[FeSCN²⁺] (M)</th><th>Absorbance</th></tr></thead><tbody>${p1rows}</tbody></table>
+<h2>Part II — Equilibrium Systems</h2>
+<p>Average Keq = <strong>${avgKeq.toFixed(0)} M⁻¹</strong></p>
+<table><thead><tr><th>Beaker</th><th>Absorbance</th><th>[FeSCN²⁺]eq</th><th>[Fe³⁺]eq</th><th>[SCN⁻]eq</th><th>Keq</th></tr></thead><tbody>${p2rows}</tbody></table>
+<h2>DRA Analysis Questions</h2>
+<table><thead><tr><th>Q</th><th>Answer</th></tr></thead><tbody>${drar}</tbody></table>
+</body></html>`;
+  const blob=new Blob([html],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`${STU.id}_${STU.name.replace(/\s+/g,'_')}_Exp10_Keq.html`;a.click();
+  toast('✓ Report downloaded! Print → Save as PDF.');
+}
+
+// ── INIT ──
+window.addEventListener('load',()=>{
+  document.getElementById('inp-name').focus();
+  [1,2,3,4,5].forEach(q=>{
+    const ta=document.getElementById('dra'+q);
+    if(ta){
+      ta.addEventListener('keydown',()=>startQT(q),{once:true});
+      ta.addEventListener('paste',e=>{e.preventDefault();toast('⚠ Pasting is not allowed.',2500);});
+      ta.addEventListener('drop',e=>e.preventDefault());
+    }
+  });
+});
+</script>
+</body>
+</html>
